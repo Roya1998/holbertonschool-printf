@@ -1,28 +1,60 @@
 #include <stdarg.h>
 #include <unistd.h>
 
-/**
- * _putchar - writes a character to stdout
- * @c: character to print
- * Return: number of characters written
- */
-int _putchar(char c)
+/* Helper function to print a character */
+int print_char(char c)
 {
     return write(1, &c, 1);
 }
 
-/**
- * _printf - prints formatted output
- * @format: format string
- * Return: number of characters printed
- */
+/* Helper function to print a string */
+int print_string(const char *str)
+{
+    int i = 0;
+
+    if (!str)
+        str = "(null)";
+
+    while (str[i])
+    {
+        print_char(str[i]);
+        i++;
+    }
+    return i;
+}
+
+/* Helper function to print an integer */
+int print_integer(int n)
+{
+    int count = 0;
+    unsigned int num;
+
+    if (n < 0)
+    {
+        count += print_char('-');
+        num = -n;
+    }
+    else
+    {
+        num = n;
+    }
+
+    if (num / 10)
+        count += print_integer(num / 10);
+
+    count += print_char((num % 10) + '0');
+
+    return count;
+}
+
+/* The main _printf function */
 int _printf(const char *format, ...)
 {
-    int i = 0, count = 0;
     va_list args;
+    int i = 0, count = 0;
 
-    if (format == NULL)
-        return (-1);
+    if (!format)
+        return -1;
 
     va_start(args, format);
 
@@ -32,31 +64,19 @@ int _printf(const char *format, ...)
         {
             i++;
             if (format[i] == 'c')
-            {
-                char c = va_arg(args, int);
-                count += _putchar(c);
-            }
+                count += print_char(va_arg(args, int));
             else if (format[i] == 's')
-            {
-                char *s = va_arg(args, char *);
-                if (!s)
-                    s = "(null)";
-                while (*s)
-                    count += _putchar(*s++);
-            }
+                count += print_string(va_arg(args, char *));
             else if (format[i] == '%')
-            {
-                count += _putchar('%');
-            }
+                count += print_char('%');
+            else if (format[i] == 'd' || format[i] == 'i')
+                count += print_integer(va_arg(args, int));
             else
-            {
-                count += _putchar('%');
-                count += _putchar(format[i]);
-            }
+                count += print_char('%'), count += print_char(format[i]);
         }
         else
         {
-            count += _putchar(format[i]);
+            count += print_char(format[i]);
         }
         i++;
     }
