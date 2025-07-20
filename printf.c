@@ -1,19 +1,18 @@
 #include "main.h"
-#include <stdarg.h>
 #include <unistd.h>
 
 /**
  * _printf - produces output according to a format
  * @format: character string with format specifiers
  *
- * Return: number of characters printed (excluding null byte)
+ * Return: number of characters printed
  */
 int _printf(const char *format, ...)
 {
-	int i = 0, count = 0;
 	va_list args;
+	int i = 0, count = 0;
 
-	if (format == NULL)
+	if (!format)
 		return (-1);
 
 	va_start(args, format);
@@ -24,35 +23,14 @@ int _printf(const char *format, ...)
 		{
 			i++;
 			if (!format[i])
-				return (-1); /* Handles _printf("%") */
+				return (-1);
 
 			if (format[i] == 'c')
-			{
-				char c = va_arg(args, int);
-
-				write(1, &c, 1);
-				count++;
-			}
+				count += handle_char(args);
 			else if (format[i] == 's')
-			{
-				char *str = va_arg(args, char *);
-				int j = 0;
-
-				if (!str)
-					str = "(null)";
-
-				while (str[j])
-				{
-					write(1, &str[j], 1);
-					j++;
-				}
-				count += j;
-			}
+				count += handle_string(args);
 			else if (format[i] == '%')
-			{
-				write(1, "%", 1);
-				count++;
-			}
+				count += handle_percent();
 			else
 			{
 				write(1, "%", 1);
@@ -67,7 +45,6 @@ int _printf(const char *format, ...)
 		}
 		i++;
 	}
-
 	va_end(args);
 	return (count);
 }
