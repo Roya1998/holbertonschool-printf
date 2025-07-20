@@ -1,22 +1,22 @@
 #include "main.h"
+#include <stdarg.h>
 #include <unistd.h>
 
 /**
- * _printf - produces output according to a format
- * @format: character string with format specifiers
- *
- * Return: number of characters printed
+ * _printf - Custom printf function
+ * @format: Format string
+ * Return: Number of characters printed
  */
 int _printf(const char *format, ...)
 {
-	va_list args;
 	int i = 0, count = 0;
+	va_list args;
+	char *str;
 
 	if (!format)
 		return (-1);
 
 	va_start(args, format);
-
 	while (format[i])
 	{
 		if (format[i] == '%')
@@ -24,25 +24,24 @@ int _printf(const char *format, ...)
 			i++;
 			if (!format[i])
 				return (-1);
-
 			if (format[i] == 'c')
-				count += handle_char(args);
-			else if (format[i] == 's')
-				count += handle_string(args);
-			else if (format[i] == '%')
-				count += handle_percent();
-			else
 			{
-				write(1, "%", 1);
-				write(1, &format[i], 1);
-				count += 2;
+				char c = va_arg(args, int);
+				write(1, &c, 1), count++;
 			}
+			else if (format[i] == 's')
+			{
+				str = va_arg(args, char *);
+				if (!str)
+					str = "(null)";
+				for (; *str; str++, count++)
+					write(1, str, 1);
+			}
+			else
+				write(1, format[i] == '%' ? "%" : (char[]){'%', format[i], 0}, format[i] == '%' ? 1 : 2), count += format[i] == '%' ? 1 : 2;
 		}
 		else
-		{
-			write(1, &format[i], 1);
-			count++;
-		}
+			write(1, &format[i], 1), count++;
 		i++;
 	}
 	va_end(args);
